@@ -1,0 +1,72 @@
+global proc shelf_Ray_SpaceMatching () {
+    global string $gBuffStr;
+    global string $gBuffStr0;
+    global string $gBuffStr1;
+
+
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "#script for head space matching\nimport pymel.core as pm\nimport maya.cmds as cmds\n\ndef getNsName(original_name):\n    return crt_ns + original_name\n    \n\n#object is headctrl\noriginal_ctrl_name = \"head_ctrl\"\n\n#get current space\ncrt_space = cmds.getAttr(ns_ctrl_name + \".space\")\n#get next space\npc = (crt_space + 1)%2\n\n#get nameSpaced control name\ncrt_ns = pm.selected()[0].namespace()\nns_ctrl_name = getNsName(original_ctrl_name)\n\n#get current translate\ncrt_wst = cmds.xform(ns_ctrl_name, query = True, worldSpace = True, translation = True)\n\n#get current rotate\ncrt_wsr = cmds.xform(ns_ctrl_name, query = True, worldSpace = True, rotation = True)\n\n\n#switch space\ncmds.setAttr(ns_ctrl_name + \".space\", pc)\n\n#match space\ncmds.xform(ns_ctrl_name, worldSpace = True, translation = crt_wst)\ncmds.xform(ns_ctrl_name, worldSpace = True, rotation = crt_wsr)\n\n\n\n    \n" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Head" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "Head" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "#script for head space matching\nimport pymel.core as pm\nimport maya.cmds as cmds\n\ndef getNsName(original_name):\n    return crt_ns + original_name\n    \n\n#object is headctrl\noriginal_ctrl_name = \"head_ctrl\"\n\n#get nameSpaced control name\ncrt_ns = pm.selected()[0].namespace()\nns_ctrl_name = getNsName(original_ctrl_name)\n\n#get current space\ncrt_space = cmds.getAttr(ns_ctrl_name + \".space\")\n#get next space\npc = (crt_space + 1)%2\n\n#get current translate\ncrt_wst = cmds.xform(ns_ctrl_name, query = True, worldSpace = True, translation = True)\n\n#get current rotate\ncrt_wsr = cmds.xform(ns_ctrl_name, query = True, worldSpace = True, rotation = True)\n\n\n#switch space\ncmds.setAttr(ns_ctrl_name + \".space\", pc)\n\n#match space\ncmds.xform(ns_ctrl_name, worldSpace = True, translation = crt_wst)\ncmds.xform(ns_ctrl_name, worldSpace = True, rotation = crt_wsr)\n\n\n\n    \n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "#script for head space matching\nimport pymel.core as pm\nimport maya.cmds as cmds\n\ndef getNsName(original_name):\n    return crt_ns + original_name\n\n#object is left wrist\noriginal_ctrl_name = \"ctrl_ik_l_wrist\"\n\n#get nameSpaced control name\ncrt_ns = pm.selected()[0].namespace()\nns_ctrl_name = getNsName(original_ctrl_name)\n\n#get current space\ncrt_space = cmds.getAttr(ns_ctrl_name + \".Spaces\")\n#get next space\npc = (crt_space + 1)%4\n\n#get current translate\ncrt_wst = cmds.xform(ns_ctrl_name, query = True, worldSpace = True, translation = True)\n\n#get current rotate\ncrt_wsr = cmds.xform(ns_ctrl_name, query = True, worldSpace = True, rotation = True)\n\n\n#switch space\ncmds.setAttr(ns_ctrl_name + \".Spaces\", pc)\n\n#match space\ncmds.xform(ns_ctrl_name, worldSpace = True, translation = crt_wst)\ncmds.xform(ns_ctrl_name, worldSpace = True, rotation = crt_wsr)\n\n\n\n    \n" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "l_Wrist" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "Left Wrist" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "#script for head space matching\nimport pymel.core as pm\nimport maya.cmds as cmds\n\ndef getNsName(original_name):\n    return crt_ns + original_name\n\n#object is left wrist\noriginal_ctrl_name = \"ctrl_ik_l_wrist\"\n\n#get nameSpaced control name\ncrt_ns = pm.selected()[0].namespace()\nns_ctrl_name = getNsName(original_ctrl_name)\n\n#get current space\ncrt_space = cmds.getAttr(ns_ctrl_name + \".Spaces\")\n#get next space\npc = (crt_space + 1)%4\n\n#get current translate\ncrt_wst = cmds.xform(ns_ctrl_name, query = True, worldSpace = True, translation = True)\n\n#get current rotate\ncrt_wsr = cmds.xform(ns_ctrl_name, query = True, worldSpace = True, rotation = True)\n\n\n#switch space\ncmds.setAttr(ns_ctrl_name + \".Spaces\", pc)\n\n#match space\ncmds.xform(ns_ctrl_name, worldSpace = True, translation = crt_wst)\ncmds.xform(ns_ctrl_name, worldSpace = True, rotation = crt_wsr)\n\n\n\n    \n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+
+} 

@@ -148,9 +148,12 @@ def createSwitch(tfd_name_list, joint_list):
 						 get_weightAttr_name(ith_parentConstraint[0], ith_ik_joint[0], "W0"))
 
 	for i in xrange(num_objects-1, 0, -1):
-		print ik_joint_chain[i-1]
 		cmds.parent(ik_joint_chain[i], ik_joint_chain[i-1])
 		cmds.parent(fk_joint_chain[i], fk_joint_chain[i-1])
+
+	#create IK handle
+	print str(ik_joint_chain[-1])
+	cmds.ikHandle(startJoint = ik_joint_chain[0][0], endEffector = ik_joint_chain[-1][0], solver = "ikRPsolver")
 	cmds.connectAttr(control_name + "." + attr_name, reverse_node+".inputX")
 	return [reverse_node]
 
@@ -288,4 +291,3 @@ def win(fakeinput = True):
 					height = 50 )
 	cmds.button(label = "Create Switch", command = partial(second_button, [fst_textfield, scd_textfield, thd_textfield, frth_textfield, ffth_textfield, control_name_space], joint_list))
 	cmds.showWindow( window )
-win()# fk-ik-switch-create-tool
