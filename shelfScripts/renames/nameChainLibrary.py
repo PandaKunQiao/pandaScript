@@ -26,3 +26,7 @@ RFATTRLS = [("custom_attributes", "enum", ("_________", 0)),
 		  ("ball_pivot", "float", 0), 
 		  ("ball_slide", "float", 0),
 		  ("banking", "float", 0)]
+
+# spine joint chain
+SPINEJNTCHAIN = ["sk_hips_jnt", "sk_spine_A_jnt", "sk_spine_B_jnt", "sk_spine_C", "sk_chest_jnt"]
+LEGJNTCHAIN = ["sk_l_femur_jnt", "sk_l_knee_jnt", "sk_l_ankle_jnt"]

@@ -10,18 +10,26 @@ from polyLib import *
 # for hand controls
 
 # finger ctrl chians
-THUMBCTRLCHAIN = ["ctrl_l_thumb_A", "ctrl_l_thumb_B", "ctrl_l_thumb_C"]
-INDEXCTRLCHAIN = ["ctrl_l_index_A", "ctrl_l_index_B", "ctrl_l_index_C"]
-MIDDLECTRLCHAIN = ["ctrl_l_middle_A", "ctrl_l_middle_B", "ctrl_l_middle_C"]
-RINGCTRLCHAIN = ["ctrl_l_ring_A", "ctrl_l_ring_B", "ctrl_l_ring_C"]
-LITTLECTRLCHAIN = ["ctrl_l_little_A", "ctrl_l_little_B", "ctrl_l_little_C"]
-
-FINGERCTRLCHAIN = ["ctrl_l_thumb_A", "ctrl_l_thumb_B", "ctrl_l_thumb_C", 
+THUMBCTRLCHAIN = 	["ctrl_l_thumb_A", "ctrl_l_thumb_B", "ctrl_l_thumb_C"]
+INDEXCTRLCHAIN = 	["ctrl_l_index_A", "ctrl_l_index_B", "ctrl_l_index_C"]
+MIDDLECTRLCHAIN = 	["ctrl_l_middle_A", "ctrl_l_middle_B", "ctrl_l_middle_C"]
+RINGCTRLCHAIN = 	["ctrl_l_ring_A", "ctrl_l_ring_B", "ctrl_l_ring_C"]
+LITTLECTRLCHAIN = 	["ctrl_l_little_A", "ctrl_l_little_B", "ctrl_l_little_C"]
+FINGERCTRLCHAIN = 	["ctrl_l_thumb_A", "ctrl_l_thumb_B", "ctrl_l_thumb_C", 
 					"ctrl_l_index_A", "ctrl_l_index_B", "ctrl_l_index_C", 
 					"ctrl_l_middle_A", "ctrl_l_middle_B", "ctrl_l_middle_C", 
 					"ctrl_l_ring_A", "ctrl_l_ring_B", "ctrl_l_ring_C", 
 					"ctrl_l_little_A", "ctrl_l_little_B", "ctrl_l_little_C"]
 PALMCTRL = "ctrl_l_palm"
+
+# assisting cube names
+HANDCUBE = "cube_l_hand"
+THUMBCUBE = "cube_l_thumb"
+INDEXCUBE = "cube_l_index"
+MIDDLECUBE = "cube_l_middle"
+RINGCUBE = "cube_l_ring"
+LITTLECUBE = "cube_l_little"
+
 THUMBPOSCHAIN = [[0.130560543603, 0.0,2.19703176249], [1.03882659081, 0.0,2.19703176249], [1.95546050229, 0.0,2.19703176249]]
 INDEXPOSCHAIN = [[2.13147675473, 0.0,1.1332830162], [3.1193908792, 0.0,1.1332830162], [4.11988348897, 0.0,1.1332830162]]
 MIDDLEPOSCHAIN = [[2.46978781997, 0.0,0.0725509862787], [3.45770194445, 0.0,0.0725509862787], [4.45819455422, 0.0,0.0725509862787]]
@@ -77,9 +85,20 @@ def selectNode(nodeName, *args):
 def closeReverseWindow(*args):
 	cmds.deleteUI("New_Reverse_Node")
 
+
 def getWeightAttrName(constraintName, jointName, suffix):
 	return constraintName + "." + jointName + suffix
 
+# INPUT: tansform node 1's name, transform node 2's name
+# OUTPUT: a float which is the world distance between obj1 and obj2
+def calcDistance(obj1, obj2):
+	pos1 = cmds.xform(obj1, query = True, translation = True, worldSpace = True)
+	pos2 = cmds.xform(obj2, query = True, translation = True, worldSpace = True)
+	deltX = pos1[0] - pos2[0]
+	deltY = pos1[1] - pos2[1]
+	deltZ = pos1[2] - pos2[2]
+	dist = (deltX ** 2.0 + deltY ** 2.0 + deltZ ** 2.0) ** 0.5
+	return dist
 # input: cube name
 # output: created cube name
 # sideeff:create a cube at (0, 0, 0)
@@ -141,26 +160,33 @@ def orientJntChain(rootJnt, orient = "general"):
 # output: a joint chain list
 # side: generic function to create a single joint chain according to the
 # orientation
-def buildSingleJntChain(locLs, orient, prefix, suffix):
-	print locLs
-	preJnt = ""
+def buildSingleJntChain(locLs, cubeName, orient, prefix, suffix):
 	jntLs = []
-	for index in xrange(len(locLs)):
+
+	# get first joint's location and build it
+	jntName = addSuffix(addPrefix(getMainName(locLs[0], "loc_"), prefix),suffix)
+	# get position of locator
+	transPos = cmds.xform(locLs[0],query = True,translation = True,worldSpace = True)
+	# creat the joint
+	cmds.select(clear = True)
+	crtJnt = cmds.joint(name = jntName)
+	cmds.xform(jntName, translation = transPos)
+
+	# for the rest of fingers
+	preJnt = crtJnt
+	jntLs += [crtJnt]
+	for index in xrange(1, len(locLs)):
 		# prepare names for each iteration
+		preLoc = locLs[index-1]
 		loc = locLs[index]
 		jntName = addSuffix(addPrefix(getMainName(loc, "loc_"), prefix),suffix)
 
 		# get position of locator
-		transPos = cmds.xform(loc, query = True, translation = True)
+		transPos = calcDistance(loc, preLoc)
 
 		# creat the joint
-		cmds.select(clear = True)
 		crtJnt = cmds.joint(name = jntName)
-		cmds.xform(jntName, translation = transPos)
-		if index != 0:
-			print crtJnt
-			print preJnt
-			cmds.parent(crtJnt, preJnt)
+		cmds.xform(jntName, translation = (transPos, 0, 0))
 		preJnt = crtJnt
 		jntLs += [crtJnt]
 
@@ -174,6 +200,12 @@ def buildSingleJntChain(locLs, orient, prefix, suffix):
 							secondaryAxisOrient = "zup", 
 							zeroScaleOrient = True, 
 							children = True)
+
+	# rotate the joint to cube's rotation
+	cmds.delete(cmds.orientConstraint(cubeName, rootJnt))
+	cmds.makeIdentity(cube, apply = True, rotate = True, translate = True,
+							scale = True, preserveNormals = True,
+							normal = False)
 	return jntLs
 
 def createSingleFingerLocs(ctrlLs, posLs, cubeName, cubeTransform):
@@ -206,7 +238,7 @@ def createSingleFingerLocs(ctrlLs, posLs, cubeName, cubeTransform):
 def createFingerLocs(ctrlLs, posLs, palmCtrl, palmPos):
 
 	# make a cube, transform to proper shape and zero out
-	cube = createCube("cube_l_hand")
+	cube = createCube(HANDCUBE)
 	setTransAttr(cube, translate = [1.775, 0, 0], scale = [8.504, 2.877, 6.367])
 	cmds.makeIdentity(cube, apply = True, rotate = True, translate = True,
 							scale = True, preserveNormals = True,
@@ -215,15 +247,15 @@ def createFingerLocs(ctrlLs, posLs, palmCtrl, palmPos):
 
 	# create rotation indicators for each finger
 	(thumbCube, thumbLocLs) = createSingleFingerLocs(THUMBCTRLCHAIN, 
-								THUMBPOSCHAIN, "cube_l_thumb", THUMBTRANSFORM)
+								THUMBPOSCHAIN, THUMBCUBE, THUMBTRANSFORM)
 	(indexCube, indexLocLs) = createSingleFingerLocs(INDEXCTRLCHAIN,
-								INDEXPOSCHAIN, "cube_l_index", INDEXTRANSFORM)
+								INDEXPOSCHAIN, INDEXCUBE, INDEXTRANSFORM)
 	(middleCube, middleLocLs) = createSingleFingerLocs(MIDDLECTRLCHAIN,
-								MIDDLEPOSCHAIN, "cube_l_middle", MIDDLETRANSFORM)
+								MIDDLEPOSCHAIN, MIDDLECUBE, MIDDLETRANSFORM)
 	(ringCube, ringLocLs) = createSingleFingerLocs(RINGCTRLCHAIN,
-								RINGPOSCHAIN, "cube_l_ring", RINGTRANSFORM)
+								RINGPOSCHAIN, RINGCUBE, RINGTRANSFORM)
 	(littleCube, littleLocLs) = createSingleFingerLocs(LITTLECTRLCHAIN,
-								LITTLEPOSCHAIN, "cube_l_little", LITTLETRANSFORM)
+								LITTLEPOSCHAIN, LITTLECUBE, LITTLETRANSFORM)
 	
 	# parent locators under the big cube
 	cmds.parent([thumbCube, indexCube, middleCube, ringCube, littleCube], cube)
@@ -231,7 +263,8 @@ def createFingerLocs(ctrlLs, posLs, palmCtrl, palmPos):
 	# create palm locator
 	cmds.spaceLocator(name = palmCtrl)
 	cmds.parent(palmCtrl, cube)
-	return thumbLocLs + indexLocLs + middleLocLs + ringLocLs + littleLocLs
+	return (thumbLocLs + indexLocLs + middleLocLs + ringLocLs + littleLocLs,
+		[thumbCube, indexCube, middleCube, ringCube, littleCube])
 
 
 
@@ -239,9 +272,9 @@ def createFingerLocs(ctrlLs, posLs, palmCtrl, palmPos):
 # input: locList has locators from A to Z 
 # output: jntList has joints from A to Z
 # side: create a whole chain of finger joints
-def buildSingleFingerChain(locLs):
+def buildSingleFingerChain(locLs, cubeLs):
 	# call the generic function to build a chain of joint
-	return buildSingleJntChain(locLs, "finger", "bn_", "_jnt")
+	return buildSingleJntChain(locLs, cubeName, "finger", "bn_", "_jnt")
 
 
 
@@ -250,16 +283,16 @@ def buildSingleFingerChain(locLs):
 # input: loclist has finger locators
 # output: jointlist at corresponding positions
 # side: create all finger joints
-def buildMultFingerJoints(locLs):
+def buildMultFingerJoints(locLs, cubeLs):
 	jntLs = []
 	fingerRootLs = []
 	for i in xrange(5):
-		crtFingerJntLs = buildSingleFingerChain(locLs[i*3:(i*3+3)])
+		crtFingerJntLs = buildSingleFingerChain(locLs[i*3:(i*3+3)], cubeLs[i])
 		jntLs += crtFingerJntLs
 		fingerRootLs += [crtFingerJntLs[0]]
 	print "build all finger joints successfully"
 	print locLs
-	palmJnt = buildSingleJntChain([PALMCTRL], "palm", "bn_", "_jnt")
+	palmJnt = buildSingleJntChain([PALMCTRL], HANDCUBE, "palm", "bn_", "_jnt")
 	cmds.parent(fingerRootLs, palmJnt)
 	jntLs += [palmJnt]
 	return jntLs
@@ -268,4 +301,4 @@ def buildMultFingerJoints(locLs):
 
 
 locs = createFingerLocs(FINGERCTRLCHAIN, FINGERPOSCHAIN, PALMCTRL, PALMPOS)
-buildMultFingerJoints(locs)
+# buildMultFingerJoints(locs)
