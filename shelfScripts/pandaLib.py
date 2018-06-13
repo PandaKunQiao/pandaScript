@@ -58,3 +58,11 @@ def createCube(cubeName):
 		name = cubeName)
 	cmds.select([])
 	return cube
+
+# input all the ctrls that want enforce parent constraint on
+def addParentConstraint(parentLs, childLs):
+	if parentLs != childLs:
+		print "number of parents is not equal to number of children"
+		return None
+	for i in xrange(len(parentLs)):
+		cmds.addParentConstraint(parentLs[i], childLs[i], maintainOffset = True)

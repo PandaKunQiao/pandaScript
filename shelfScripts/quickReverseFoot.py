@@ -12,7 +12,7 @@ ATTRLS = [("custom_attributes", "enum", ("_________", 0)),
 		  ("ball_slide", "float", 0),
 		  ("banking", "float", 0)]
 
-if jntChain[0][4] == "l":
+if jntChain[0][3] == "l":
 	RFCHAIN = ["rf_l_outFoot_jnt", "rf_l_inFoot_jnt", "rf_l_heel_jnt", 
 			   "rf_l_toe_jnt", "rf_l_ball_jnt", "rf_l_ankle_jnt"]
 	RFCTRL = "ctrl_l_ik_foot"
@@ -29,7 +29,7 @@ def addIkChain(jntChain):
 	for i in xrange(numJnt-1):
 		startJnt = jntChain[i]
 		endJnt = jntChain[i+1]
-		ikHandleName = endJnt[:-3] + "ikHandle"
+		ikHandleName = "rf_" + endJnt[3:-3] + "ikhandle"
 		handleEffLs = cmds.ikHandle(startJoint = startJnt, endEffector = endJnt, 
 									solver = "ikRPsolver", name = ikHandleName)
 		eff = handleEffLs[1]
@@ -79,11 +79,58 @@ def addAttrToCtrl(trsNode, attrTupleLs):
 
 # set up attributes for reverse foot, this function is hard-coded and only for 
 # this specific input of names
-def rigRf(jntLs, handleEffLs):
-
+def rigRf():
 	# rig foot rolling
-	cmds.setDrivenKeyframe(currentDriver = "nurbsCircle1.translateX", attribute = "pSphere.translateX", value = 1)
+	cmds.setDrivenKeyframe("footRoll_" + RFCHAIN[2] + ".rotateX", currentDriver = RFCTRL + "." + ATTRLS[1][0])
+	cmds.setDrivenKeyframe("footRoll_" + RFCHAIN[3] + ".rotateX", currentDriver = RFCTRL + "." + ATTRLS[1][0])
+	cmds.setDrivenKeyframe("footRoll_" + RFCHAIN[4] + ".rotateX", currentDriver = RFCTRL + "." + ATTRLS[1][0])
 
+	# rig heel pivot
+	cmds.setDrivenKeyframe(RFCHAIN[2] + ".rotateX", currentDriver = RFCTRL + "." + ATTRLS[2][0], ott = "spline", itt = "spline")
+	cmds.setDrivenKeyframe(RFCHAIN[2] + ".rotateX", currentDriver = RFCTRL + "." + ATTRLS[2][0], ott = "spline", itt = "spline", driverValue = 1, value = 1)
+	cmds.selectKey(clear = True)
+	cmds.selectKey(RFCHAIN[2] + "_rotateX", keyframe = True, float = (0,0))
+	cmds.setInfinity(poi = "linear", pri = "linear")
+
+
+	# rig heel slide
+	cmds.setDrivenKeyframe(RFCHAIN[2] + ".rotateY", currentDriver = RFCTRL + "." + ATTRLS[3][0], ott = "spline", itt = "spline")
+	cmds.setDrivenKeyframe(RFCHAIN[2] + ".rotateY", currentDriver = RFCTRL + "." + ATTRLS[3][0], ott = "spline", itt = "spline", driverValue = 1, value = 1)
+	cmds.selectKey(clear = True)
+	cmds.selectKey(RFCHAIN[2] + "_rotateY", keyframe = True, float = (0,0))
+	cmds.setInfinity(poi = "linear", pri = "linear")
+
+	# rig toe pivot
+	cmds.setDrivenKeyframe(RFCHAIN[3] + ".rotateX", currentDriver = RFCTRL + "." + ATTRLS[4][0], ott = "spline", itt = "spline")
+	cmds.setDrivenKeyframe(RFCHAIN[3] + ".rotateX", currentDriver = RFCTRL + "." + ATTRLS[4][0], ott = "spline", itt = "spline", driverValue = 1, value = 1)
+	cmds.selectKey(clear = True)
+	cmds.selectKey(RFCHAIN[3] + "_rotateX", keyframe = True, float = (0,0))
+	cmds.setInfinity(poi = "linear", pri = "linear")
+
+	# rig toe slide
+	cmds.setDrivenKeyframe(RFCHAIN[3] + ".rotateY", currentDriver = RFCTRL + "." + ATTRLS[5][0], ott = "spline", itt = "spline")
+	cmds.setDrivenKeyframe(RFCHAIN[3] + ".rotateY", currentDriver = RFCTRL + "." + ATTRLS[5][0], ott = "spline", itt = "spline", driverValue = 1, value = 1)
+	cmds.selectKey(clear = True)
+	cmds.selectKey(RFCHAIN[3] + "_rotateY", keyframe = True, float = (0,0))
+	cmds.setInfinity(poi = "linear", pri = "linear")
+
+	# rig ball pivot
+	cmds.setDrivenKeyframe(RFCHAIN[4] + ".rotateX", currentDriver = RFCTRL + "." + ATTRLS[6][0], ott = "spline", itt = "spline")
+	cmds.setDrivenKeyframe(RFCHAIN[4] + ".rotateX", currentDriver = RFCTRL + "." + ATTRLS[6][0], ott = "spline", itt = "spline", driverValue = 1, value = 1)
+	cmds.selectKey(clear = True)
+	cmds.selectKey(RFCHAIN[4] + "_rotateX", keyframe = True, float = (0,0))
+	cmds.setInfinity(poi = "linear", pri = "linear")
+
+	# rig ball slide
+	cmds.setDrivenKeyframe(RFCHAIN[4] + ".rotateY", currentDriver = RFCTRL + "." + ATTRLS[7][0], ott = "spline", itt = "spline")
+	cmds.setDrivenKeyframe(RFCHAIN[4] + ".rotateY", currentDriver = RFCTRL + "." + ATTRLS[7][0], ott = "spline", itt = "spline", driverValue = 1, value = 1)
+	cmds.selectKey(clear = True)
+	cmds.selectKey(RFCHAIN[4] + "_rotateY", keyframe = True, float = (0,0))
+	cmds.setInfinity(poi = "linear", pri = "linear")
+
+	# rig banking
+	cmds.setDrivenKeyframe(RFCHAIN[0] + ".rotateZ", currentDriver = RFCTRL + "." + ATTRLS[8][0])
+	cmds.setDrivenKeyframe(RFCHAIN[1] + ".rotateZ", currentDriver = RFCTRL + "." + ATTRLS[8][0])
 
 addIkChain(jntChain)
 addAttrToCtrl(RFCTRL, ATTRLS)
