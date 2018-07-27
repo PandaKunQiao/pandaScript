@@ -31,7 +31,9 @@ def createIkSpine(startEff, endEff):
 	[ikhandle, eff, crv] = cmds.ikHandle(startJoint = startEff, endEffector = endEff, solver = "ikSplineSolver", simplifyCurve = False)
 	ikhandle = cmds.rename(ikhandle, IKSPINEHANDLE)
 	crv = cmds.rename(crv, IKSPINECURVE)
-	# cmds.setAttr()
+	cmds.setAttr(ikhandle + ".dTwistControlEnable", True)
+	cmds.setAttr(ikhandle + ".dWorldUpType", 4);
+	# then manually set forward axis to x, up axis to y, chest control for the end, spine control for the starting point
 	return crv
 
 # input: the curve 

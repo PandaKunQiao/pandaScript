@@ -2,6 +2,39 @@
 import maya.cmds as cmds
 from functools import partial
 
+# on the right side 
+LEGJNTCHAIN_R = ["sk_r_femur_jnt" ,"sk_r_knee_jnt" ,"sk_r_ankle_jnt" ,"sk_r_ball_jnt" ,"sk_r_toe_jnt"]
+IKLEGJNTCHAIN_R = ["ik_r_femur_jnt" ,"ik_r_knee_jnt" ,"ik_r_ankle_jnt"]
+FKLEGJNTCHAIN_R = ["fk_r_femur_jnt" ,"fk_r_knee_jnt" ,"fk_r_ankle_jnt"]
+
+LEGFKCTRLCHAIN_R = ["ctrl_r_fk_femur" ,"ctrl_r_fk_knee" ,"ctrl_r_fk_ankle"]
+LEGIKCTRLCHAIN_R = ["ctrl_r_knee" ,"ctrl_r_ik_foot"]
+
+LEGSWITCHCTRL_R = "ctrl_r_legSwitch"
+REVLEGNODE_R = "rev_r_leg"
+
+
+# for foot controls
+LEGJNTCHAIN = ["sk_l_femur_jnt" ,"sk_l_knee_jnt" ,"sk_l_ankle_jnt" ,"sk_l_ball_jnt" ,"sk_l_toe_jnt"]
+IKLEGJNTCHAIN = ["ik_l_femur_jnt" ,"ik_l_knee_jnt" ,"ik_l_ankle_jnt"]
+FKLEGJNTCHAIN = ["fk_l_femur_jnt" ,"fk_l_knee_jnt" ,"fk_l_ankle_jnt"]
+
+LEGFKCTRLCHAIN = ["ctrl_l_fk_femur" ,"ctrl_l_fk_knee" ,"ctrl_l_fk_ankle"]
+LEGIKCTRLCHAIN = ["ctrl_l_knee" ,"ctrl_l_ik_foot"]
+
+LEGSWITCHCTRL = "ctrl_l_legSwitch"
+LEGSWITCHATTR = "ik_leg"
+REVLEGNODE = "rev_l_leg"
+
+
+# input all the ctrls that want enforce parent constraint on
+def addParentConstraint(parentLs, childLs):
+	if len(parentLs) != len(childLs):
+		print "number of parents is not equal to number of children"
+		return None
+	for i in xrange(len(parentLs)):
+		cmds.parentConstraint(parentLs[i], childLs[i], maintainOffset = True)
+
 
 ##################################################################################
 #							Main Procedure Helpers							     #
@@ -291,3 +324,56 @@ def win(fakeinput = True):
 					height = 50 )
 	cmds.button(label = "Create Switch", command = partial(second_button, [fst_textfield, scd_textfield, thd_textfield, frth_textfield, ffth_textfield, control_name_space], joint_list))
 	cmds.showWindow( window )
+
+
+# rig the other side of fk/ik system
+def quickCreateSwitch(jntLs, revNode, attrName, fkCtrlLs, ikCtrlLs):
+	bind_prefix = "sk_"
+	fk_prefix = "fk_"
+	ik_prefix = "ik_"
+	reverse_name = revNode
+	attr_name = attrName
+	list_objects = joint_list
+	num_objects = len(list_objects)
+
+	#reverse node
+	reverse_node = cmds.createNode("reverse", name = reverse_name)
+
+	#the returned list
+	list_new_nodes = []
+	ik_joint_chain = []
+	fk_joint_chain = []
+	parent_constraint_chain = []
+	#go through all the selected nodes
+	for i in xrange(num_objects):
+
+		ith_bind_name = list_objects[i]
+		ith_joint_name = get_main_name(ith_bind_name, bind_prefix)
+		ith_ik_name = add_prefix(ith_joint_name, ik_prefix)
+		ith_fk_name = add_prefix(ith_joint_name, fk_prefix)
+		ith_ik_joint = cmds.duplicate(ith_bind_name, parentOnly = True, name = ith_ik_name)
+		ith_fk_joint = cmds.duplicate(ith_bind_name, parentOnly = True, name = ith_fk_name)
+		ik_joint_chain += [ith_ik_joint]
+		fk_joint_chain += [ith_fk_joint]
+		ith_parentConstraint = cmds.parentConstraint(ith_ik_joint, ith_fk_joint, ith_bind_name)
+
+		#connect reverse node to the fk weight
+		cmds.connectAttr(reverse_node+".outputX", 
+						 get_weightAttr_name(ith_parentConstraint[0], ith_fk_joint[0], "W1"))
+		cmds.connectAttr(control_name + "." + attr_name, 
+						 get_weightAttr_name(ith_parentConstraint[0], ith_ik_joint[0], "W0"))
+
+	for i in xrange(num_objects-1, 0, -1):
+		cmds.parent(ik_joint_chain[i], ik_joint_chain[i-1])
+		cmds.parent(fk_joint_chain[i], fk_joint_chain[i-1])
+
+	#create IK handle
+	print str(ik_joint_chain[-1])
+	cmds.ikHandle(startJoint = ik_joint_chain[0][0], endEffector = ik_joint_chain[2][0], solver = "ikRPsolver")
+	cmds.connectAttr(control_name + "." + attr_name, reverse_node+".inputX")
+
+	# constraint fk joints to fk controllers
+	addParentConstraint(fkCtrlLs, fk_joint_chain)
+
+	# add ik controls
+	

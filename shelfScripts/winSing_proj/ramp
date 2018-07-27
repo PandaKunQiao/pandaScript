@@ -1,0 +1,42 @@
+/*
+*/
+vector $dummy = morph_waist_ramp.outAlpha;
+float $output_waist[];
+float $totalFace_waist = 45.0;
+float $jntNum_waist = 9.0;
+float $offsetFace_waist = 2.5;
+float $gapFace_waist = ($totalFace_waist - $offsetFace_waist * 2)/($jntNum_waist-1);
+for ($i = 0; $i<= ($jntNum_waist-1); $i++){
+	float $pos = $i * $gapFace_waist * (1.0/$totalFace_waist) + $offsetFace_waist * (1.0/$totalFace_waist);
+	float $val[] = `colorAtPoint -u 0.5 -v $pos morph_waist_ramp`;
+	$output_waist[$i] = 1 + $val[0] * ctrl_scale.waist_scale_z;
+}
+
+$dummy = morph_belly_ramp.outAlpha;
+float $output_belly[];
+float $totalFace_belly = 30.0;
+float $jntNum_belly = 6.0;
+float $offsetFace_belly = 2.5;
+float $gapFace_belly = ($totalFace_belly - $offsetFace_belly * 2)/($jntNum_belly-1);
+for ($i = 0; $i<= ($jntNum-1); $i++){
+	float $pos = $i * $gapFace_belly * (1.0/$totalFace_belly) + $offsetFace_belly * (1.0/$totalFace_belly);
+	float $val[] = `colorAtPoint -u 0.5 -v $pos morph_belly_ramp`;
+	$output_belly[$i] = 1 + $val[0] * ctrl_scale.belly_scale_z;
+}
+
+
+morph_belly_1_jnt.scaleZ = $output_belly[0] * $output_waist[0];
+morph_belly_2_jnt.scaleZ = $output_belly[1] * $output_waist[1];
+morph_belly_3_jnt.scaleZ = $output_belly[2] * $output_waist[2];
+morph_belly_4_jnt.scaleZ = $output_belly[3] * $output_waist[3];
+morph_belly_5_jnt.scaleZ = $output_belly[4] * $output_waist[4];
+morph_belly_6_jnt.scaleZ = $output_belly[5] * $output_waist[5];
+morph_spine_1_jnt.scaleZ = $output_waist[0];
+morph_spine_2_jnt.scaleZ = $output_waist[1];
+morph_spine_3_jnt.scaleZ = $output_waist[2];
+morph_spine_4_jnt.scaleZ = $output_waist[3];
+morph_spine_5_jnt.scaleZ = $output_waist[4];
+morph_spine_6_jnt.scaleZ = $output_waist[5];
+morph_spine_7_jnt.scaleZ = $output_waist[6];
+morph_spine_8_jnt.scaleZ = $output_waist[7];
+morph_spine_9_jnt.scaleZ = $output_waist[8];

@@ -23,4 +23,5 @@ def conCorrectiveShapes(bsNode):
 				driver = "sk_" + weight[driverIndex+1:axisIndex] + "_jnt"
 			cmds.setDrivenKeyframe(bsNode + "." + weight, cd = driver + ".rotate" + string.upper(axis), driverValue = 0, value = 0, itt = "linear", ott = "linear")
 			cmds.setDrivenKeyframe(bsNode + "." + weight, cd = driver + ".rotate" + string.upper(axis), driverValue = maxVal, value = 1, itt = "linear", ott = "linear")
-conCorrectiveShapes("bs_cloak")
+
+conCorrectiveShapes("bs_r_leg")
