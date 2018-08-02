@@ -1,0 +1,9 @@
+import maya.OpenMaya as om
+import maya.cmds as cmds
+jntList = cmds.ls(selection = True)
+startJnt = jntList[0]
+midJnt = jntList[1]
+endJnt = jntList[2]
+
+startV = cmds.xform(startJnt)
+projTo = 
