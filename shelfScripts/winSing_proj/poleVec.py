@@ -1,6 +1,8 @@
 import maya.OpenMaya as om
 import maya.cmds as cmds
-jntList = cmds.ls(selection = True)
+selectLs = cmds.ls(selection = True)
+objLs = cmds.ls(selectLs[3], selectLs[0], selectLs[4])
+jntList = cmds.ls(selectLs[0], selectLs[1], selectLs[2])
 startJnt = jntList[0]
 midJnt = jntList[1]
 endJnt = jntList[2]
@@ -42,9 +44,9 @@ def addPoleVecConstraint(parent, child, ikHandle):
 	cmds.connectAttr(parent + ".worldMatrix[0]", parentDm + ".inputMatrix")
 	cmds.connectAttr(child + ".worldMatrix[0]", childDm + ".inputMatrix")
 	pm = cmds.createNode("plusMinusAverage", name = parent + "_" + child + "_poleVecConstraint_plus")
-	cmds.setAttr(pm + ".operation", 1)
-	cmds.connectAttr(parentDm + ".outputTranslate", pm + ".input3D[0]")
-	cmds.connectAttr(childDm + ".outputTranslate", pm + ".input3D[1]")
+	cmds.setAttr(pm + ".operation", 2)
+	cmds.connectAttr(parentDm + ".outputTranslate", pm + ".input3D[1]")
+	cmds.connectAttr(childDm + ".outputTranslate", pm + ".input3D[0]")
 	cmds.connectAttr(pm + ".output3D", ikHandle + ".poleVector")
-objLs = cmds.ls(selection = True)
+
 addPoleVecConstraint(objLs[0], objLs[1], objLs[2])

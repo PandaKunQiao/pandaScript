@@ -12,7 +12,7 @@ def get_main_name(name, suffix):
 	if suffix == "":
 		main_name = name
 	else:
-		main_name = name[:(-len(prefix))]
+		main_name = name[:(-len(suffix))]
 	print "main name is" + main_name
 	return main_name
 
